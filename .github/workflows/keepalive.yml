@@ -20,6 +20,8 @@ jobs:
         pip3 install -r requirements.txt
     - name: Running keepalive
       env:
-        KOY_EB: ${{ secrets.KOY_EB }}
+        USER1_API_KEYS: ${{ secrets.USER1_API_KEYS }}
+        USER1_APP_URL: ${{ secrets.USER1_APP_URL }}
+        USER1_APP_NAME: ${{ secrets.USER1_APP_NAME }}
       run: |
         python3 koyeb.py
