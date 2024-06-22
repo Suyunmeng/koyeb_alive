@@ -101,7 +101,7 @@ def login(usr, pwd):
                 j = 0
                 for i in range(len(lastlogin.get('activities'))):
                     if lastlogin.get('activities')[i].get('object').get('name') == "console" and j < 2:
-                        if lastlogin.get('count', 0) > 1 and j == 1:
+                        if lastlogin.get('count') > 1 and j == 1:
                             List.append(f"上次登录日期：{get_time_stamp(lastlogin.get('activities')[i].get('created_at'))}")
                         else:
                             List.append(f"当前登录日期：{get_time_stamp(lastlogin.get('activities')[i].get('created_at'))}")
@@ -125,9 +125,9 @@ if __name__ == '__main__':
         users = os.environ['KOY_EB'].split('&')
         for x in users:
             i += 1
-            name, pwd = x.split('-')
+            usr, pwd = x.split('-')
             List.append(f'===> [账号{str(i)}]Start <===')
-            login(name, pwd)
+            login(usr, pwd)
             List.append(f'===> [账号{str(i)}]End <===\n')
             time.sleep(1)
         tt = '\n'.join(List)
