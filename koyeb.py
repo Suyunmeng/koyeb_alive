@@ -58,7 +58,7 @@ def auto_living(token):
     else:
         List.append(f"当前账户未创建实例应用！！！")
 
-def login(usr, pwd):
+def login(name, pwd):
     login_url = 'https://app.koyeb.com/v1/account/login'
     headers = {
         'origin': 'https://app.koyeb.com',
@@ -67,7 +67,7 @@ def login(usr, pwd):
         'user-agent': 'Mozilla/5.0 (Linux; Android 10; PBEM00) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.52 Mobile Safari/537.36'
     }
     data = {
-        'email': usr,
+        'email': name,
         'password': pwd
     }
     res = session.post(login_url, headers=headers, data=json.dumps(data))
@@ -84,7 +84,7 @@ def login(usr, pwd):
         resp = session.get(check_url, headers=check_head)
         if resp.status_code == 200:
             info = resp.json()
-            List.append(f"账号`{info.get('user').get('usr')}`登陆成功")
+            List.append(f"账号`{info.get('user').get('name')}`登陆成功")
             List.append(f"ID：{info.get('user').get('id')}")
             List.append(f"注册日期：{get_time_stamp(info.get('user').get('created_at'))}")
             lastlogin_url = 'https://app.koyeb.com/v1/activities?offset=0&limit=20'
@@ -100,7 +100,7 @@ def login(usr, pwd):
                 lastlogin = resg.json()
                 j = 0
                 for i in range(len(lastlogin.get('activities'))):
-                    if lastlogin.get('activities')[i].get('object').get('usr') == "console" and j < 2:
+                    if lastlogin.get('activities')[i].get('object').get('name') == "console" and j < 2:
                         if lastlogin.get('count') > 1 and j == 1:
                             List.append(f"上次登录日期：{get_time_stamp(lastlogin.get('activities')[i].get('created_at'))}")
                         else:
@@ -125,9 +125,9 @@ if __name__ == '__main__':
         users = os.environ['KOY_EB'].split('&')
         for x in users:
             i += 1
-            usr, pwd = x.split('-')
+            name, pwd = x.split('-')
             List.append(f'===> [账号{str(i)}]Start <===')
-            login(usr, pwd)
+            login(name, pwd)
             List.append(f'===> [账号{str(i)}]End <===\n')
             time.sleep(1)
         tt = '\n'.join(List)
