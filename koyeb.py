@@ -79,7 +79,6 @@ def login(name, pwd):
             'authorization': f'Bearer {token}',
             'referer': 'https://app.koyeb.com/auth/signin',
             'user-agent': 'Mozilla/5.0 (Linux; Android 10; PBEM00) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.52 Mobile Safari/537.36'
-
         }
         resp = session.get(check_url, headers=check_head)
         if resp.status_code == 200:
@@ -92,7 +91,6 @@ def login(name, pwd):
                 'authorization': f'Bearer {token}',
                 'referer': 'https://app.koyeb.com/activity',
                 'user-agent': 'Mozilla/5.0 (Linux; Android 10; PBEM00) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.52 Mobile Safari/537.36'
-
             }
             time.sleep(7)
             resg = session.get(lastlogin_url, headers=lastlogin_head)
@@ -101,7 +99,7 @@ def login(name, pwd):
                 j = 0
                 for i in range(len(lastlogin.get('activities'))):
                     if lastlogin.get('activities')[i].get('object').get('name') == "console" and j < 2:
-                        if lastlogin.get('count') > 1 and j == 1:
+                        if lastlogin.get('count', 0) > 1 and j == 1:
                             List.append(f"上次登录日期：{get_time_stamp(lastlogin.get('activities')[i].get('created_at'))}")
                         else:
                             List.append(f"当前登录日期：{get_time_stamp(lastlogin.get('activities')[i].get('created_at'))}")
