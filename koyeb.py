@@ -1,134 +1,87 @@
-#!/usr/bin/python3
-# -*- coding: utf8 -*-
-import json
+import os
 import requests
-import os, random
-import time, datetime
 
-List = []
-session = requests.Session()
+# 用户数据
+users = {
+    "user1": {
+        "app_url": os.getenv("USER1_APP_URL"),
+        "app_name": os.getenv("USER1_APP_NAME"),
+        "api_key": os.getenv("USER1_API_KEY"),
+    },
+    "user2": {
+        "app_url": os.getenv("USER2_APP_URL"),
+        "app_name": os.getenv("USER2_APP_NAME"),
+        "api_key": os.getenv("USER2_API_KEY"),
+    },
+    # 添加更多用户...
+}
 
-def get_time_stamp(result):
-    utct_date = datetime.datetime.strptime(result, "%Y-%m-%dT%H:%M:%S.%f%z")
-    local_date = utct_date + datetime.timedelta(hours=8)
-    local_date_srt = datetime.datetime.strftime(local_date, "%Y-%m-%d %H:%M:%S")
-    return local_date_srt
+base_url = 'https://app.koyeb.com/v1/apps'   # 这个不要动
 
-def auto_living(token):
-    # 获取账户应用信息
-    list_url = 'https://app.koyeb.com/api/app/list'
-    list_head = {
-        'authorization': f'Bearer {token}',
-        'cookie': f'accessToken={token}',
-        'content-type': 'application/json',
-        'referer': 'https://app.koyeb.com/',
-        'user-agent': 'Mozilla/5.0 (Linux; Android 10; PBEM00) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.52 Mobile Safari/537.36'
-    }
-    res_list = session.get(list_url, headers=list_head)
-    list_date = res_list.json()
-    if len(list_date.get("apps")) > 0:
-        for i in range(len(list_date.get("apps"))):
-            stop_url = f"https://app.koyeb.com/v1/apps/{list_date.get('apps')[i]['id']}/pause"  # 暂停api
-            run_url = f"https://app.koyeb.com/v1/apps/{list_date.get('apps')[i]['id']}/resume"  # 启动api
-            ac_head = {
-                'authorization': f'Bearer {token}',
-                'content-type': 'application/json',
-                'origin': 'https://app.koyeb.com',
-                'referer': f"https://app.koyeb.com/apps/{list_date.get('apps')[i]['id']}/settings/danger-zone",
-                'user-agent': 'Mozilla/5.0 (Linux; Android 10; PBEM00) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.52 Mobile Safari/537.36'
-            }
-            if list_date.get('apps')[i]['status'] == "healthy":
-                List.append(f"{list_date.get('apps')[i]['name']} 应用运行正常！！！")
-            elif list_date.get('apps')[i]['status'] == "paused":
-                List.append(f"{list_date.get('apps')[i]['name']} 应用已暂停运行！！！")
-                res_run = session.post(run_url, headers=ac_head)
-                if res_run.status_code == 200:
-                    List.append(f"启动命令已发送，应用将在3分钟后恢复正常！！！")
-            elif list_date.get('apps')[i]['status'] == "resuming":
-                List.append(f"{list_date.get('apps')[i]['name']} 应用正在启动中！！！")
-            else:
-                List.append(f"{list_date.get('apps')[i]['name']} 应用运行出错！！！")
-                res_stop = session.post(stop_url, headers=ac_head)
-                if res_stop.status_code == 200:
-                    List.append(f"暂停命令已发送，等待1分钟后发送启动命令")
-                time.sleep(60)
-                res_run = session.post(run_url, headers=ac_head)
-                if res_run.status_code == 200:
-                    List.append(f"启动命令已发送，应用将在3分钟后恢复正常！！！")
-    else:
-        List.append(f"当前账户未创建实例应用！！！")
+# 从环境变量获取 Telegram 变量，不填则默认不用
+tgbot_token = os.getenv("TGBOT_TOKEN")    # 填写Telegram bot token
+tgchat_id = os.getenv("TGCHAT_ID")    # 填写Telegram chat id
 
-def login(name, pwd):
-    login_url = 'https://app.koyeb.com/v1/account/login'
-    headers = {
-        'origin': 'https://app.koyeb.com',
-        'referer': 'https://app.koyeb.com/auth/signin',
-        'content-type': 'application/json',
-        'user-agent': 'Mozilla/5.0 (Linux; Android 10; PBEM00) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.52 Mobile Safari/537.36'
-    }
-    data = {
-        'email': name,
-        'password': pwd
-    }
-    res = session.post(login_url, headers=headers, data=json.dumps(data))
-    if res.status_code == 200:
-        status = res.json()
-        token = status.get('token').get('id')
-        check_url = 'https://app.koyeb.com/v1/account/profile'
-        check_head = {
-            'authorization': f'Bearer {token}',
-            'referer': 'https://app.koyeb.com/auth/signin',
-            'user-agent': 'Mozilla/5.0 (Linux; Android 10; PBEM00) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.52 Mobile Safari/537.36'
-        }
-        resp = session.get(check_url, headers=check_head)
-        if resp.status_code == 200:
-            info = resp.json()
-            List.append(f"账号`{info.get('user').get('name')}`登陆成功")
-            List.append(f"ID：{info.get('user').get('id')}")
-            List.append(f"注册日期：{get_time_stamp(info.get('user').get('created_at'))}")
-            lastlogin_url = 'https://app.koyeb.com/v1/activities?offset=0&limit=20'
-            lastlogin_head = {
-                'authorization': f'Bearer {token}',
-                'referer': 'https://app.koyeb.com/activity',
-                'user-agent': 'Mozilla/5.0 (Linux; Android 10; PBEM00) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.52 Mobile Safari/537.36'
-            }
-            time.sleep(7)
-            resg = session.get(lastlogin_url, headers=lastlogin_head)
-            if resg.status_code == 200:
-                lastlogin = resg.json()
-                j = 0
-                for i in range(len(lastlogin.get('activities'))):
-                    if lastlogin.get('activities')[i].get('object').get('name') == "console" and j < 2:
-                        if lastlogin.get('count', 0) > 1 and j == 1:
-                            List.append(f"上次登录日期：{get_time_stamp(lastlogin.get('activities')[i].get('created_at'))}")
-                        else:
-                            List.append(f"当前登录日期：{get_time_stamp(lastlogin.get('activities')[i].get('created_at'))}")
-                        j += 1
-            else:
-                print(resg.text)
+# 发送tg消息
+def send_telegram_message(tgbot_token, tgchat_id, send_message):
+    if tgbot_token and tgchat_id and send_message:
+        response = requests.post(
+            f'https://api.telegram.org/bot{tgbot_token}/sendMessage',
+            json={"chat_id": tgchat_id, "text": send_message}
+        )
+        return response.status_code == 200
+
+# 检查app的域名状态是否正常
+def check_app_status(app_url):
+    try:
+        response = requests.get(app_url)
+        return response.status_code == 200
+    except requests.RequestException as e:
+        return False
+
+# 恢复app
+def resume_app(api_key, app_name):
+    api_headers = {'Authorization': f'Bearer {api_key}'}
+    response = requests.get(base_url, headers=api_headers)
+    if response.status_code == 200:
+        apps = response.json().get('apps', [])
+        for app in apps:
+            if app['name'] == app_name:
+                app_id = app['id']
+                app_status = app['status']
+                # 如果 App 状态不是 HEALTHY，则尝试恢复
+                if app_status != 'HEALTHY':
+                    resume_url = f'{base_url}/{app_id}/resume'
+                    resume_response = requests.post(resume_url, headers=api_headers)
+                    if resume_response.status_code == 200:
+                        send_message = "Koyeb app is successfully resumed !"
+                        send_telegram_message(tgbot_token, tgchat_id, send_message)
+                        return True
+                    else:
+                        print(f"Failed to resume app: {resume_response.status_code}")
+                else:
+                    send_message = "Koyeb app is healthy,no need to do anything."
+                    # 状态正常，默认注释不发送消息，需要使用去掉注释即可
+                   # send_telegram_message(tgbot_token, tgchat_id, send_message)
+                return False
         else:
-            print(resp.text)
-        # 自动保活应用
-        auto_living(token)
+            print(f"App named {app_name} not found.")
+            return False
     else:
-        List.append('账号登陆失败: 账号或密码错误')
-        List.append(res.text)
+        print(f"Failed to fetch apps: {response.status_code}")
+        return False
 
-if __name__ == '__main__':
-    delay_sec = random.randint(1,50)
-    List.append(f'随机延时{delay_sec}s')
-    time.sleep(delay_sec)
-    i = 0
-    if 'KOY_EB' in os.environ:
-        users = os.environ['KOY_EB'].split('&')
-        for x in users:
-            i += 1
-            name, pwd = x.split('-')
-            List.append(f'===> [账号{str(i)}]Start <===')
-            login(name, pwd)
-            List.append(f'===> [账号{str(i)}]End <===\n')
-            time.sleep(1)
-        tt = '\n'.join(List)
-        print(tt)
-    else:
-        print('未配置环境变量')
+def main():
+    # 对每个用户检查应用状态
+    for user, user_data in users.items():
+        app_url = user_data["app_url"]
+        app_name = user_data["app_name"]
+        api_key = user_data["api_key"]
+        if not check_app_status(app_url):
+            print(f"Koyeb app of {user} 状态异常,正在恢复")
+            resume_app(api_key, app_name)
+        else:
+            print(f"Koyeb app of {user} 状态正常,无需操作")
+
+if __name__ == "__main__":
+    main()
