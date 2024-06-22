@@ -10,7 +10,6 @@
   | ------------ | ------ | ------ | ------ |
   | KOY_EB | 是 | 无 | 账号密码用`-`分割，多账户用&隔开[例如：aaa-bbb&ccc-ddd] |
 
-![image](https://user-images.githubusercontent.com/116990986/211692321-34df154a-320a-448f-9abe-2efab9c53550.png)
 
 ## 鸣谢
 
