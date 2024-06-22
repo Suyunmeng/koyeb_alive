@@ -84,7 +84,7 @@ def login(usr, pwd):
         resp = session.get(check_url, headers=check_head)
         if resp.status_code == 200:
             info = resp.json()
-            List.append(f"账号`{info.get('user').get('name')}`登陆成功")
+            List.append(f"账号`{info.get('user').get('usr')}`登陆成功")
             List.append(f"ID：{info.get('user').get('id')}")
             List.append(f"注册日期：{get_time_stamp(info.get('user').get('created_at'))}")
             lastlogin_url = 'https://app.koyeb.com/v1/activities?offset=0&limit=20'
@@ -100,7 +100,7 @@ def login(usr, pwd):
                 lastlogin = resg.json()
                 j = 0
                 for i in range(len(lastlogin.get('activities'))):
-                    if lastlogin.get('activities')[i].get('object').get('name') == "console" and j < 2:
+                    if lastlogin.get('activities')[i].get('object').get('usr') == "console" and j < 2:
                         if lastlogin.get('count') > 1 and j == 1:
                             List.append(f"上次登录日期：{get_time_stamp(lastlogin.get('activities')[i].get('created_at'))}")
                         else:
