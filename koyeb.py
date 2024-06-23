@@ -1,19 +1,22 @@
 import os
 import requests
 
-# 用户数据
+# 从环境变量获取用户数据
+app_urls = os.getenv("APP_URLS").split(",")
+app_names = os.getenv("APP_NAMES").split(",")
+api_keys = os.getenv("API_KEYS").split(",")
+
+# 确保每个列表的长度相同
+assert len(app_urls) == len(app_names) == len(api_keys), "所有列表的长度必须相同"
+
+# 创建用户字典
 users = {
-    "user1": {
-        "app_url": os.getenv("USER1_APP_URL"),
-        "app_name": os.getenv("USER1_APP_NAME"),
-        "api_key": os.getenv("USER1_API_KEY"),
-    },
-    "user2": {
-        "app_url": os.getenv("USER2_APP_URL"),
-        "app_name": os.getenv("USER2_APP_NAME"),
-        "api_key": os.getenv("USER2_API_KEY"),
-    },
-    # 添加更多用户...
+    app_name: {
+        "app_url": app_url,
+        "app_name": app_name,
+        "api_key": api_key,
+    }
+    for app_url, app_name, api_key in zip(app_urls, app_names, api_keys)
 }
 
 base_url = 'https://app.koyeb.com/v1/apps'   # 这个不要动
