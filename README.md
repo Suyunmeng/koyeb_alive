@@ -8,12 +8,10 @@
 * 项目用到的环境变量
   | 变量名 | 是否必须 | 默认值 | 备注 |
   | ------------ | ------ | ------ | ------ |
-  | KOY_EB | 是 | 无 | 账号密码用`-`分割，多账户用&隔开[例如：aaa-bbb&ccc-ddd] |
+  | API_URLS | 是 | 无 | 应用url'xxx.koyeb.app' or 'your_argo_domain'用,分隔多应用 |
+  | APP_NAMES | 是 | 无 | app名，用,分隔多应用|
+  | API_KEYS | 是 | 无 | 用户access_token,到用户设置生成
 
-
-## 鸣谢
-
-Telegram 大佬 G B 的青龙面板项目文件，基于此进行修改
 
 ## 免责声明
 
