@@ -25,6 +25,3 @@ jobs:
         APP_NAMES: ${{ secrets.APP_NAMES }}
       run: |
         python3 koyeb.py
-        echo $API_KEYS
-        echo $APP_URLS
-        echo $APP_NAMES
